@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Error lookup</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      margin: 0;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 24px 16px 48px;
+    }
+    h1 { font-size: 1.25rem; margin: 0 0 16px; font-weight: 600; }
+    .search-wrap { max-width: 960px; margin: 0 auto 20px; }
+    input[type="search"] {
+      width: 100%;
+      padding: 14px 16px;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background: #fff;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,.08);
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .card-head .icon { font-size: 1.1rem; opacity: .95; }
+    .card-body { padding: 0; }
+    .err {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      padding: 10px 12px;
+      border-top: 1px solid #eee;
+      line-height: 1.4;
+    }
+    .err:first-of-type { border-top: 0; }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="search-wrap">
+    <h1>Error lookup</h1>
+    <input type="search" id="q" placeholder="Search for errors (e.g. 'Permission denied', 'No such file')..." autocomplete="off" />
+  </div>
+  <div class="grid" id="grid"></div>
+
+  <script>
+    const categories = [
+      {
+        title: "Package & Dependency Errors",
+        color: "#c62828",
+        icon: "📦",
+        errors: [
+          "E: Unable to locate package nmap",
+          "E: Could not get lock /var/lib/dpkg/lock",
+          "dpkg: error processing package python3 (--configure)",
+          "E: Package 'htoppp' has no installation candidate",
+          "W: GPG error: The following signatures couldn't be verified",
+          "dpkg: dependency problems prevent configuration of kali-linux-full"
+        ]
+      },
+      {
+        title: "Permission & File Errors",
+        color: "#1565c0",
+        icon: "🔒",
+        errors: [
+          "bash: ./script.sh: Permission denied",
+          "zsh: command not found: lsit",
+          "rm: cannot remove 'folder': Is a directory",
+          "No such file or directory",
+          "chmod: changing permissions of 'abc': Operation not permitted",
+          "touch: cannot touch '/sys/test': Read-only file system"
+        ]
+      },
+      {
+        title: "Compilation/Build Errors",
+        color: "#2e7d32",
+        icon: "</>",
+        errors: [
+          "gcc: error: file.c: No such file or directory",
+          "make: *** [main.o] Error 1",
+          "undefined reference to 'main'",
+          "g++: fatal error: no input files",
+          "collect2: error: ld returned 1 exit status"
+        ]
+      },
+      {
+        title: "Network Errors",
+        color: "#6a1b9a",
+        icon: "🌐",
+        errors: [
+          "ping: unknown host example.comm",
+          "curl: (6) Could not resolve host: test",
+          "curl: (7) Failed to connect to site.com port 443: Timed out"
+        ]
+      },
+      {
+        title: "Python Errors",
+        color: "#ef6c00",
+        icon: "🐍",
+        errors: [
+          "ModuleNotFoundError: No module named 'flaskk'",
+          "IndentationError: unexpected indent",
+          "SyntaxError: invalid syntax"
+        ]
+      },
+      {
+        title: "Git Errors",
+        color: "#00838f",
+        icon: "◇",
+        errors: [
+          "fatal: not a git repository (or any of the parent directories): .git",
+          "error: failed to push some refs to 'origin'",
+          "fatal: remote origin already exists"
+        ]
+      }
+    ];
+
+    const grid = document.getElementById("grid");
+    const q = document.getElementById("q");
+
+    function render() {
+      grid.innerHTML = "";
+      const needle = q.value.trim().toLowerCase();
+      for (const c of categories) {
+        const card = document.createElement("div");
+        card.className = "card";
+        const head = document.createElement("div");
+        head.className = "card-head";
+        head.style.background = c.color;
+        head.innerHTML = `<span class="icon">${c.icon}</span><span>${c.title}</span>`;
+        const body = document.createElement("div");
+        body.className = "card-body";
+        let any = false;
+        for (const e of c.errors) {
+          const match = !needle || e.toLowerCase().includes(needle) || c.title.toLowerCase().includes(needle);
+          const row = document.createElement("div");
+          row.className = "err" + (match ? "" : " hidden");
+          row.textContent = e;
+          if (match) any = true;
+          body.appendChild(row);
+        }
+        card.appendChild(head);
+        card.appendChild(body);
+        if (needle && !any) card.classList.add("hidden");
+        grid.appendChild(card);
+      }
+    }
+
+    q.addEventListener("input", render);
+    render();
+  </script>
+</body>
+</html>
